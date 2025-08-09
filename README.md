@@ -2,11 +2,8 @@
 
 This is a simple API scaper for Otakudesu website. This API scaper is used to get the latest anime list from Otakudesu website.
 
-<strong>PS: This project is for educational purposes only. Use it at your own risk.</strong>
+<strong>PS: This project is for educational purposes only. Use it at your own hanz.</strong>
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=rizkyhaksono/otakudesu-be&type=Date)](https://star-history.com/#rizkyhaksono/otakudesu-be&Date)
 
 ## Installation
 
