@@ -3,52 +3,43 @@ import axios from 'axios';
 import scrapeSearchResult from '@/lib/scrapeSearchResult';
 import { searchResultAnime } from '@/types/types';
 
-const search = async (keyword: string): Promise<searchResultAnime[]> => {
-  // Validasi input
-  if (!keyword || typeof keyword !== 'string') {
-    return [];
-  }
+export default async function search(keyword: string): Promise<searchResultAnime[]> {
+  if (!keyword || typeof keyword !== 'string') return [];
 
   const BASEURL = process.env.BASEURL;
   if (!BASEURL) {
-    console.error('BASEURL environment variable is not set');
+    console.error('❌ BASEURL is missing in environment variables!');
     return [];
   }
 
   try {
-    const encodedKeyword = encodeURIComponent(keyword.trim());
-    const url = `${BASEURL}/?s=${encodedKeyword}&post_type=anime`;
+    const url = `${BASEURL}/?s=${encodeURIComponent(keyword.trim())}&post_type=anime`;
+    console.log('🔍 Fetching URL:', url); // <-- Ini akan muncul di Vercel Logs
 
-    // Tambahkan timeout & header untuk hindari blokir
     const response = await axios.get(url, {
-      timeout: 10000, // 10 detik
+      timeout: 10000,
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-      },
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
     });
 
+    console.log('✅ Got response, status:', response.status);
     const html = response.data;
 
-    // Opsional: cek apakah respons berisi pesan "Tidak ditemukan"
-    if (typeof html !== 'string' || html.length === 0) {
+    // Cek apakah HTML berisi error Cloudflare
+    if (html.includes('cloudflare') || html.includes('Checking your browser')) {
+      console.error('🚨 Blocked by Cloudflare or bot protection');
       return [];
     }
 
     return scrapeSearchResult(html);
   } catch (error: any) {
-    // Log error untuk debugging di Vercel
-    console.error('Search scraping error:', {
-      keyword,
-      url: `${BASEURL}/?s=...&post_type=anime`,
+    console.error('💥 Scraping error:', {
       message: error.message,
+      code: error.code,
       status: error.response?.status,
-      statusText: error.response?.statusText,
+      url: `${BASEURL}/?s=...`,
     });
-
-    // Jangan lempar error — kembalikan array kosong agar API tidak 500
     return [];
   }
-};
-
-export default search;
+}
